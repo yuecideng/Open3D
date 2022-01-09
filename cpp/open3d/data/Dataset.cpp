@@ -45,15 +45,38 @@ std::string LocateDataRoot() {
     return data_root;
 }
 
-Dataset::Dataset(const std::string& data_root) {
+Dataset::Dataset(const std::string& prefix, const std::string& data_root)
+    : prefix_(prefix) {
     if (data_root.empty()) {
         data_root_ = LocateDataRoot();
     } else {
         data_root_ = data_root;
     }
+    if (prefix_.empty()) {
+        utility::LogError("prefix cannot be empty.");
+    }
+
+    // Initialize paths, to be used by other helper functions.
+    download_prefix_ = "download/" + prefix_;
+    path_to_download_ = data_root_ + "/" + download_prefix_;
+    extract_prefix_ = "extract/" + prefix_;
+    path_to_extract_ = data_root_ + "/" + extract_prefix_;
 }
 
-std::string Dataset::GetDataRoot() const { return data_root_; }
+void Dataset::DisplayDataTree(const int depth_level) const {
+    utility::LogInfo("Extract Path: {}", extract_prefix_);
+    utility::LogInfo("Download Path: {}", download_prefix_);
+    utility::LogInfo("");
+    utility::filesystem::DisplayDirectoryTree(extract_prefix_, depth_level);
+}
+
+void Dataset::DeleteDownloadFiles() const {
+    utility::filesystem::DeleteDirectory(path_to_download_);
+}
+
+void Dataset::DeleteExtractFiles() const {
+    utility::filesystem::DeleteDirectory(path_to_extract_);
+}
 
 }  // namespace data
 }  // namespace open3d

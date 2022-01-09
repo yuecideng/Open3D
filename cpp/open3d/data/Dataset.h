@@ -27,6 +27,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 namespace open3d {
 namespace data {
@@ -54,16 +55,35 @@ namespace data {
 ///   the code and load their own data in a similar way.
 class Dataset {
 public:
-    Dataset(const std::string& data_root = "");
+    Dataset(const std::string& prefix = "", const std::string& data_root = "");
+
     virtual ~Dataset() {}
+
+    void DisplayDataTree(const int depth_level = 0) const;
+
+    /// \brief Display dataset related information, such as source, type, data
+    /// loader functionalities, usage, licence, and other useful informations.
+    std::string Help() const;
+
+    void DeleteDownloadFiles() const;
+    void DeleteExtractFiles() const;
 
     /// Get data root directory. The data root is set at construction time or
     /// automatically determined.
-    std::string GetDataRoot() const;
+    const std::string GetDataRoot() const { return data_root_; }
 
-protected:
+public:
+    std::unordered_map<std::string, std::vector<std::string>>
+            map_download_filenames_to_urls_;
+
+private:
     /// Open3D data root.
     std::string data_root_;
+    std::string prefix_;
+    std::string extract_prefix_;
+    std::string download_prefix_;
+    std::string path_to_extract_;
+    std::string path_to_download_;
 };
 
 /// A dataset class locates the data root directory in the following order:
