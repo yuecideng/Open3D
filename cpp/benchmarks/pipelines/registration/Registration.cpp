@@ -30,6 +30,7 @@
 
 #include <Eigen/Eigen>
 
+#include "open3d/data/Dataset.h"
 #include "open3d/geometry/KDTreeFlann.h"
 #include "open3d/geometry/PointCloud.h"
 #include "open3d/io/PointCloudIO.h"
@@ -42,12 +43,6 @@ namespace pipelines {
 namespace registration {
 
 // Testing parameters:
-// Filename for pointcloud registration data.
-static const std::string source_pointcloud_filename =
-        utility::GetDataPathCommon("ICP/cloud_bin_0.pcd");
-static const std::string target_pointcloud_filename =
-        utility::GetDataPathCommon("ICP/cloud_bin_1.pcd");
-
 static const double voxel_downsampling_factor = 0.02;
 
 // ICP ConvergenceCriteria.
@@ -83,6 +78,13 @@ static std::tuple<geometry::PointCloud, geometry::PointCloud> LoadPointCloud(
 
 static void BenchmarkICPLegacy(benchmark::State& state,
                                const TransformationEstimationType& type) {
+    // Filename for pointcloud registration data.
+    data::dataset::Open3DSampleData sample_data;
+    const std::string source_pointcloud_filename =
+            sample_data.path_ + "/ICP/cloud_bin_0.pcd";
+    const std::string target_pointcloud_filename =
+            sample_data.path_ + "/ICP/cloud_bin_1.pcd";
+
     geometry::PointCloud source;
     geometry::PointCloud target;
 

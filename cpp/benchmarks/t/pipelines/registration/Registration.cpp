@@ -30,6 +30,7 @@
 
 #include "open3d/core/CUDAUtils.h"
 #include "open3d/core/nns/NearestNeighborSearch.h"
+#include "open3d/data/Dataset.h"
 #include "open3d/t/io/PointCloudIO.h"
 #include "open3d/t/pipelines/registration/TransformationEstimation.h"
 #include "open3d/utility/DataManager.h"
@@ -40,12 +41,6 @@ namespace pipelines {
 namespace registration {
 
 // Testing parameters:
-// Filename for pointcloud registration data.
-static const std::string source_pointcloud_filename =
-        utility::GetDataPathCommon("ICP/cloud_bin_0.pcd");
-static const std::string target_pointcloud_filename =
-        utility::GetDataPathCommon("ICP/cloud_bin_1.pcd");
-
 static const double voxel_downsampling_factor = 0.02;
 
 // ICP ConvergenceCriteria.
@@ -107,6 +102,12 @@ static void BenchmarkICP(benchmark::State& state,
                          const core::Dtype& dtype,
                          const TransformationEstimationType& type) {
     utility::SetVerbosityLevel(utility::VerbosityLevel::Error);
+    // Filename for pointcloud registration data.
+    data::dataset::Open3DSampleData sample_data;
+    const std::string source_pointcloud_filename =
+            sample_data.path_ + "/ICP/cloud_bin_0.pcd";
+    const std::string target_pointcloud_filename =
+            sample_data.path_ + "/ICP/cloud_bin_1.pcd";
 
     geometry::PointCloud source(device), target(device);
     std::tie(source, target) = LoadTensorPointCloudFromFile(
