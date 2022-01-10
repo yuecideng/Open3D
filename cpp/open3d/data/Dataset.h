@@ -28,6 +28,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace open3d {
 namespace data {
@@ -57,13 +58,13 @@ class Dataset {
 public:
     Dataset(const std::string& prefix = "", const std::string& data_root = "");
 
-    virtual ~Dataset() {}
+    ~Dataset() {}
 
     void DisplayDataTree(const int depth_level = 0) const;
 
     /// \brief Display dataset related information, such as source, type, data
     /// loader functionalities, usage, licence, and other useful informations.
-    std::string Help() const;
+    const std::string Help() const;
 
     void DeleteDownloadFiles() const;
     void DeleteExtractFiles() const;
@@ -73,10 +74,9 @@ public:
     const std::string GetDataRoot() const { return data_root_; }
 
 public:
-    std::unordered_map<std::string, std::vector<std::string>>
-            map_download_filenames_to_urls_;
+    std::vector<std::string> download_filenames_;
 
-private:
+protected:
     /// Open3D data root.
     std::string data_root_;
     std::string prefix_;
@@ -95,6 +95,87 @@ private:
 /// LocateDataRoot() shall be called when the user-specified data root is not
 /// set, i.e. in case (b) and (c).
 std::string LocateDataRoot();
+
+class TemplateDataset : public Dataset {
+public:
+    TemplateDataset(
+            const std::string& prefix,
+            const std::unordered_map<std::string, std::vector<std::string>>&
+                    sha256_to_mirror_urls,
+            const bool no_extract = false,
+            const std::string& data_root = "");
+
+    ~TemplateDataset() {}
+
+private:
+    const std::unordered_map<std::string, std::vector<std::string>>
+            sha256_to_mirror_urls_;
+    std::unordered_map<std::string, std::string> filenames_to_sha256_;
+};
+
+namespace dataset {
+
+static std::unordered_map<std::string, std::vector<std::string>>
+        mirrors_open3d_sample_data{
+                {"dbe17919b81a39133c1dc37320768fe055c542e873d5f3a8ac5861cc38523"
+                 "4e0",
+                 {"https://github.com/isl-org/open3d_downloads/releases/"
+                  "download/00.14.01_sample_data/"
+                  "open3d_sample_data_00140100.zip"}}};
+
+class Open3DSampleData : public TemplateDataset {
+public:
+    Open3DSampleData(const std::string& prefix = "Open3DSampleData",
+                     const std::string& data_root = "")
+        : TemplateDataset(prefix, mirrors_open3d_sample_data) {
+        path_ = path_to_extract_;
+    }
+
+    std::string path_;
+};
+
+static std::unordered_map<std::string, std::vector<std::string>>
+        mirrors_redwood_living_room{
+                {"4bb14c4f15cae1d35cb77ef8a81806e5ad1aa04aedbdb8742e2d3927b0a3b"
+                 "f95",
+                 {"https://github.com/isl-org/open3d_downloads/releases/"
+                  "download/data/ICLNUIM_LivingRoomFragments.zip"}}};
+
+class RedwoodLivingRoom : public TemplateDataset {
+public:
+    RedwoodLivingRoom(const std::string& prefix = "RedwoodLivingRoom",
+                      const std::string& data_root = "")
+        : TemplateDataset(prefix, mirrors_redwood_living_room) {
+        for (int i = 0; i < 3; ++i) {
+            paths_.push_back(path_to_extract_ + "/cloud_bin_" +
+                             std::to_string(i) + ".pcd");
+        }
+    };
+
+    std::vector<std::string> paths_;
+};
+
+static std::unordered_map<std::string, std::vector<std::string>>
+        mirrors_stanford_bunny{
+                {"b1acc63bece78444aa2e15bdcc72371a201279b98c6f5d4b74c993d02f05"
+                 "66fe",
+                 {"https://github.com/isl-org/open3d_downloads/releases/"
+                  "download/data-bunny/Bunny.ply"}}};
+
+class StanfordBunny : public TemplateDataset {
+public:
+    StanfordBunny(const std::string& prefix = "StanfordBunny",
+                  const std::string& data_root = "")
+        : TemplateDataset(prefix,
+                          mirrors_stanford_bunny,
+                          /*no_extract =*/true) {
+        path_ = path_to_extract_ + "/Bunny.ply";
+    }
+
+    std::string path_;
+};
+
+}  // namespace dataset
 
 }  // namespace data
 }  // namespace open3d
