@@ -35,12 +35,29 @@ namespace open3d {
 namespace tests {
 
 TEST(Dataset, LocateDataRoot) {
-    data::Dataset ds;
+    data::Dataset ds("prefix");
     EXPECT_EQ(ds.GetDataRoot(),
               utility::filesystem::GetHomeDirectory() + "/open3d_data");
 
-    data::Dataset ds_custom("/my/custom/data_root");
+    data::Dataset ds_custom("prefix", "/my/custom/data_root");
     EXPECT_EQ(ds_custom.GetDataRoot(), "/my/custom/data_root");
+}
+
+TEST(Dataset, DownloadDatasets) {
+    data::dataset::RedwoodLivingRoom icl_frag;
+    icl_frag.DisplayDataTree();
+    icl_frag.DeleteDownloadFiles();
+    icl_frag.DeleteExtractFiles();
+
+    data::dataset::StanfordBunny bunny("Bunny");
+    bunny.DisplayDataTree();
+    bunny.DeleteDownloadFiles();
+    bunny.DeleteExtractFiles();
+
+    data::dataset::Open3DSampleData sample_data;
+    sample_data.DisplayDataTree();
+    sample_data.DeleteDownloadFiles();
+    sample_data.DeleteExtractFiles();
 }
 
 }  // namespace tests

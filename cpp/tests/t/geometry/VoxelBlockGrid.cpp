@@ -29,6 +29,7 @@
 #include "core/CoreTest.h"
 #include "open3d/core/EigenConverter.h"
 #include "open3d/core/Tensor.h"
+#include "open3d/data/Dataset.h"
 #include "open3d/io/PinholeCameraTrajectoryIO.h"
 #include "open3d/io/TriangleMeshIO.h"
 #include "open3d/t/io/ImageIO.h"
@@ -59,8 +60,8 @@ static core::Tensor GetIntrinsicTensor() {
 
 static std::vector<core::Tensor> GetExtrinsicTensors() {
     // Extrinsics
-    std::string trajectory_path =
-            std::string(TEST_DATA_DIR) + "/RGBD/odometry.log";
+    data::dataset::Open3DSampleData sample_data;
+    std::string trajectory_path = sample_data.path_ + "/RGBD/odometry.log";
     auto trajectory =
             io::CreatePinholeCameraTrajectoryFromFile(trajectory_path);
 
@@ -102,14 +103,15 @@ static VoxelBlockGrid Integrate(const core::HashBackendType &backend,
                               {core::Float32, dtype, dtype}, {{1}, {1}, {3}},
                               3.0 / 512, resolution, 10000, device, backend);
 
+    data::dataset::Open3DSampleData sample_data;
     for (size_t i = 0; i < extrinsics.size(); ++i) {
         Image depth = t::io::CreateImageFromFile(
                               fmt::format("{}/RGBD/depth/{:05d}.png",
-                                          std::string(TEST_DATA_DIR), i))
+                                          sample_data.path_, i))
                               ->To(device);
         Image color = t::io::CreateImageFromFile(
                               fmt::format("{}/RGBD/color/{:05d}.jpg",
-                                          std::string(TEST_DATA_DIR), i))
+                                          sample_data.path_, i))
                               ->To(device);
 
         core::Tensor frustum_block_coords = vbg.GetUniqueBlockCoordinates(
@@ -151,11 +153,13 @@ TEST_P(VoxelBlockGridPermuteDevices, Exceptions) {
     std::vector<core::Tensor> extrinsics = GetExtrinsicTensors();
     float depth_scale = 1000.0;
     float depth_max = 3.0;
+
+    data::dataset::Open3DSampleData sample_data;
     Image depth = *t::io::CreateImageFromFile(
-            fmt::format("{}/RGBD/depth/00000.png", std::string(TEST_DATA_DIR)));
+            fmt::format("{}/RGBD/depth/00000.png", sample_data.path_));
 
     Image color = *t::io::CreateImageFromFile(
-            fmt::format("{}/RGBD/color/00000.jpg", std::string(TEST_DATA_DIR)));
+            fmt::format("{}/RGBD/color/00000.jpg", sample_data.path_));
 
     auto vbg = VoxelBlockGrid();
     EXPECT_THROW(vbg.GetUniqueBlockCoordinates(depth, intrinsic, extrinsics[0],
@@ -227,9 +231,11 @@ TEST_P(VoxelBlockGridPermuteDevices, GetUniqueBlockCoordinates) {
                                   backend);
 
         const int i = 0;
+
+        data::dataset::Open3DSampleData sample_data;
         Image depth = t::io::CreateImageFromFile(
                               fmt::format("{}/RGBD/depth/{:05d}.png",
-                                          std::string(TEST_DATA_DIR), i))
+                                          sample_data.path_, i))
                               ->To(device);
         core::Tensor block_coords_from_depth = vbg.GetUniqueBlockCoordinates(
                 depth, intrinsic, extrinsics[i], depth_scale, depth_max);
@@ -310,6 +316,7 @@ TEST_P(VoxelBlockGridPermuteDevices, RayCasting) {
     const float depth_min = 0.1;
     const float depth_max = 3.0;
 
+    data::dataset::Open3DSampleData sample_data;
     for (auto backend : backends) {
         for (auto &dtype :
              std::vector<core::Dtype>{core::Float32, core::UInt16}) {
@@ -320,7 +327,7 @@ TEST_P(VoxelBlockGridPermuteDevices, RayCasting) {
 
             Image depth = t::io::CreateImageFromFile(
                                   fmt::format("{}/RGBD/depth/{:05d}.png",
-                                              std::string(TEST_DATA_DIR), i))
+                                              sample_data.path_, i))
                                   ->To(device);
             core::Tensor frustum_block_coords = vbg.GetUniqueBlockCoordinates(
                     depth, intrinsic, extrinsics[i], depth_scale, depth_max);
@@ -370,6 +377,7 @@ TEST_P(VoxelBlockGridPermuteDevices, DISABLED_RayCastingVisualize) {
     const float depth_min = 0.1;
     const float depth_max = 3.0;
 
+    data::dataset::Open3DSampleData sample_data;
     for (auto backend : backends) {
         for (auto &dtype : std::vector<core::Dtype>{core::Float32}) {
             auto vbg = Integrate(backend, dtype, device,
@@ -379,7 +387,7 @@ TEST_P(VoxelBlockGridPermuteDevices, DISABLED_RayCastingVisualize) {
 
             Image depth = t::io::CreateImageFromFile(
                                   fmt::format("{}/RGBD/depth/{:05d}.png",
-                                              std::string(TEST_DATA_DIR), i))
+                                              sample_data.path_, i))
                                   ->To(device);
             core::Tensor frustum_block_coords = vbg.GetUniqueBlockCoordinates(
                     depth, intrinsic, extrinsics[i], depth_scale, depth_max);
