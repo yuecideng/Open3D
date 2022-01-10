@@ -279,6 +279,18 @@ bool FileExists(const std::string &filename) {
     return (fs::exists(filename) && fs::is_regular_file(filename));
 }
 
+void CopyFile(const std::string &src_path,
+              const std::string &dst_path,
+              const bool overwrite_existing) {
+    try {
+        fs::copy(src_path, dst_path,
+                 fs::copy_options::overwrite_existing |
+                         fs::copy_options::recursive);
+    } catch (std::exception &e) {
+        utility::LogError("Failed to copy {} to {}. Exception: {}.", e.what());
+    }
+}
+
 std::uintmax_t ComputeFileSizeInBytes(const std::string &filename) {
     if (!FileExists(filename)) {
         utility::LogError("File {} does not exists.", filename);
