@@ -41,17 +41,18 @@ TEST(Downloader, DownloadAndVerify) {
             "data-manager/test_data_00.zip";
     std::string sha256 =
             "66ea466a02532d61dbc457abf1408afeab360d7a35e15f1479ca91c25e838d30";
-
+    std::string md5 = "996987b27c4497dbb951ec056c9684f4";
     std::string prefix = "temp_test";
     std::string file_dir = data::LocateDataRoot() + "/" + prefix;
     std::string file_path = file_dir + "/" + "test_data_00.zip";
     EXPECT_TRUE(utility::filesystem::DeleteDirectory(file_dir));
 
     // This download shall work.
-    data::DownloadFromURL(url, sha256, prefix);
+    std::string file_path_output = data::DownloadFromURL(url, sha256, prefix);
+    EXPECT_EQ(file_path_output, file_path);
     EXPECT_TRUE(utility::filesystem::DirectoryExists(file_dir));
-    EXPECT_TRUE(
-            utility::filesystem::FileExists(file_dir + "/test_data_00.zip"));
+    EXPECT_TRUE(utility::filesystem::FileExists(file_path));
+    EXPECT_EQ(data::GetMD5(file_path_output), md5);
 
     // This download shall be skipped (look at the message).
     data::DownloadFromURL(url, sha256, prefix);

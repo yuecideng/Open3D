@@ -35,6 +35,10 @@ namespace data {
 /// \param file_path Path to the file.
 std::string GetSHA256(const std::string& file_path);
 
+/// \brief Computes MD5 Hash for the given file.
+/// \param file_path Path to the file.
+std::string GetMD5(const std::string& file_path);
+
 /// \brief Download a file from URL.
 ///
 /// \param url File URL. The saved file name will be the last part of the URL.
@@ -47,7 +51,7 @@ std::string GetSHA256(const std::string& file_path);
 /// is used. The default data root is $HOME/open3d_data. For more information,
 /// see open3d::data::Dataset class.
 /// \throw std::runtime_error If the download fails.
-void DownloadFromURL(const std::string& url,
+std::string DownloadFromURL(const std::string& url,
                      const std::string& sha256,
                      const std::string& prefix,
                      const std::string& data_root = "");

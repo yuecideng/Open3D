@@ -29,6 +29,7 @@
 // clang-format off
 // Must include openssl before curl to build on Windows.
 #include <openssl/sha.h>
+#include <openssl/md5.h>
 
 // https://stackoverflow.com/a/41873190/1255535
 #ifdef WINDOWS
@@ -99,16 +100,53 @@ std::string GetSHA256(const std::string& file_path) {
     return os.str();
 }
 
+std::string GetMD5(const std::string& file_path) {
+    if (!utility::filesystem::FileExists(file_path)) {
+        utility::LogError("{} does not exist.", file_path);
+    }
+
+    std::ifstream fp(file_path.c_str(), std::ios::ate);
+
+    if (!fp.good()) {
+        std::ostringstream os;
+        utility::LogError("Cannot open {}", file_path);
+    }
+
+    std::ifstream::pos_type fileSize;
+    char* memBlock;
+
+    // get file size & copy file to memory
+    //~ file.seekg(-1,ios::end); // exludes EOF
+    fileSize = fp.tellg();
+    memBlock = new char[fileSize];
+    fp.seekg(0, std::ios::beg);
+    fp.read(memBlock, fileSize);
+    fp.close();
+
+    unsigned char hash[MD5_DIGEST_LENGTH];
+    // get md5 sum
+    MD5((unsigned char*)memBlock, fileSize, hash);
+
+    std::ostringstream os;
+    os << std::hex << std::setfill('0');
+
+    for (int i = 0; i < MD5_DIGEST_LENGTH; ++i) {
+        os << std::setw(2) << static_cast<unsigned int>(hash[i]);
+    }
+
+    return os.str();
+}
+
 static size_t WriteDataCb(void* ptr, size_t size, size_t nmemb, FILE* stream) {
     size_t written;
     written = fwrite(ptr, size, nmemb, stream);
     return written;
 }
 
-void DownloadFromURL(const std::string& url,
-                     const std::string& sha256,
-                     const std::string& prefix,
-                     const std::string& data_root) {
+std::string DownloadFromURL(const std::string& url,
+                            const std::string& sha256,
+                            const std::string& prefix,
+                            const std::string& data_root) {
     // Always print URL to inform the user. If the download fails, the user
     // knows the URL.
     utility::LogInfo("Downloading {}", url);
@@ -138,7 +176,7 @@ void DownloadFromURL(const std::string& url,
         GetSHA256(file_path) == sha256) {
         utility::LogInfo("{} exists and SHA256 matches. Skipped downloading.",
                          file_path);
-        return;
+        return file_path;
     }
 
     // Download.
@@ -176,6 +214,8 @@ void DownloadFromURL(const std::string& url,
         utility::LogError("Download failed with error code: {}.",
                           curl_easy_strerror(res));
     }
+
+    return file_path;
 }
 
 }  // namespace data
