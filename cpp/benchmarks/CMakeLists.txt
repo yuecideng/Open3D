@@ -39,8 +39,10 @@ mark_as_advanced(
 
 set(BENCHMARK_SOURCE_FILES
     core/Reduction.cpp
+    core/Console.cpp
     geometry/KDTreeFlann.cpp
     geometry/SamplePoints.cpp
+    geometry/TriangleMesh.cpp
     io/PointCloudIO.cpp
     tgeometry/PointCloud.cpp
 )
