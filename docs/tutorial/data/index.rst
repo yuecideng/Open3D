@@ -3,13 +3,18 @@
 Data Module
 ===========
 
-Open3D provides `open3d.data` module for for convenient access to built-in 
+TODO:
+
+1. Fuse the description into the first code examples.
+2. See if we can make Python/C++ code in tabs.
+
+Open3D provides `open3d.data` module for convenient access to built-in
 example and test data. You'll need internet access to use the data module.
 The downloaded data will be stored in the Open3D's data root directory.
 
 A dataset class locates the data root directory in the following order:
 
-1. User-specified by `data_root` when instantiating a dataset object.
+1. User-specified by ``data_root`` when instantiating a dataset object.
 2. OPEN3D_DATA_ROOT environment variable.
 3. $HOME/open3d_data.
 
@@ -18,9 +23,9 @@ By default, (3) will be used, and it is also the recommended way.
 When a dataset object is instantiated, the corresponding data will be
 downloaded in `${data_root}/download/prefix/` and extracted or copied to
 `${data_root}/extract/prefix/`. If the extracted data directory exists,
-the files will be used without validation. If it does not exists, and the
+the files will be used without validation. If it does not exist, and the
 valid downloaded file exists, the data will be extracted from the
-downloaded file. If downloaded file does not exists, or validates against
+downloaded file. If the downloaded file does not exist or validates against
 the provided MD5, it will be re-downloaded.
 
 After the data is downloaded and extracted, the dataset object will NOT
@@ -34,50 +39,51 @@ functionalities provided for it.
 Example of loading a simple Bunny TriangleMesh using the data module:
 
 .. code-block:: Python
-    :caption: Loading and visualizing data in Python
 
-        bunny_data = open3d.data.BunnyMesh()
-        mesh = open3d.io.read_triangle_mesh(bunny_data.path)
-        o3d.visualization.draw([mesh])
+    import open3d as o3d
+
+    # Show how to specify a download prefix
+    bunny_data = open3d.data.BunnyMesh()
+
+    mesh = open3d.io.read_triangle_mesh(bunny_data.path)
+    o3d.visualization.draw([pcd])
+
+    # Todo add a more complex example, camera, rgbd, etc.
+
 
 .. code-block:: C++
-    :caption: Loading and visualizing data in C++
 
-        bunny_data = open3d::data::BunnyMesh();
-        mesh = open3d::io::ReadTriangleMesh(bunny_data.path);
-        open3d::visualization::Draw({mesh});
+    #include "open3d/Open3D.h"
+    using namespace open3d;
+
+    // Show how to specify a download prefix
+    data::BunnyMesh bunny_data;
+    geometry::TriangleMesh mesh;
+    io::ReadTriangleMesh(bunny_data.path, mesh);
+    mesh.ComputeVertexNormals();
+    visualization::Draw({mesh});
+
+    // Todo add a more complex example, camera, rgbd, etc.
 
 
 Point Cloud Data
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
-Sample PointCloud PCD
-----------------------------------------
+``SamplePointCloudPCD``
+-----------------------
 
-Loading and visualizing example:
+TODO: Very short description, e.g. what this is, what type of geometry, where
+is comes from.
 
 .. code-block:: Python
-    
-        pcd_data = open3d.data.SamplePointCloudPCD()
-        pcd = open3d.io.read_point_cloud(pcd_data.path)
-        o3d.visualization.draw([pcd])
 
+    pcd_data = o3d.data.SamplePointCloudPCD()
+    pcd = o3d.io.read_point_cloud(pcd_data.path)
 
 .. code-block:: C++
 
-        pcd_data = open3d::data::SamplePointCloudPCD();
-        pcd = open3d::io::ReadPointCloud(pcd_data.path);
-        open3d::visualization::Draw({pcd});
-
-
-Mirror(s):
-    - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/fragment.pcd>`_
-Contents:
-    fragment.pcd
-Source: 
-    Living Room point cloud fragment from Redwood RGB-D livingroom1 sequence.
-Licence: 
-    Creative Commons 3.0 (CC BY 3.0).
+    data::SamplePointCloudPCD dataset;
+    geometry::PointCloud pcd = io::ReadPointCloud(dataset.path);
 
 
 Sample PointCloud PLY
@@ -87,24 +93,24 @@ Loading and visualizing example:
 
 .. code-block:: Python
 
-        pcd_data = open3d.data.SamplePointCloudPCD()
-        pcd = open3d.io.read_point_cloud(pcd_data.path)
-        open3d.visualization.draw([pcd])
+    pcd_data = open3d.data.SamplePointCloudPCD()
+    pcd = open3d.io.read_point_cloud(pcd_data.path)
+    open3d.visualization.draw([pcd])
 
 
 .. code-block:: C++
 
-        pcd_data = open3d::data::SamplePointCloudPCD();
-        pcd = open3d::io::ReadPointCloud(pcd_data.path);
-        open3d::visualization::Draw({pcd});
+    pcd_data = open3d::data::SamplePointCloudPCD();
+    pcd = open3d::io::ReadPointCloud(pcd_data.path);
+    open3d::visualization::Draw({pcd});
 
 Mirror(s):
     - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/fragment.ply>`_
 Contents:
     fragment.ply
-Source: 
+Source:
     Living Room point cloud fragment from Redwood RGB-D livingroom1 sequence.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
@@ -130,9 +136,9 @@ Mirror(s):
     - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/EaglePointCloud.ply>`_
 Contents:
     EaglePointCloud.ply
-Source: 
+Source:
     xxx
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
@@ -162,16 +168,16 @@ Mirror(s):
     - `Mirror 2 <https://github.com/isl-org/open3d_downloads/releases/download/redwood/livingroom1-fragments-ply.zip>`_
 Contents:
     .. code-block::
-                     
+
             livingroom1-fragments-ply.zip
             ├── cloud_bin_0.ply
             ├── cloud_bin_1.ply
             ├── ...
-            └── cloud_bin_56.ply          
+            └── cloud_bin_56.ply
 
-Source: 
+Source:
     Living Room point cloud fragments from Redwood RGB-D livingroom1 sequence.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
@@ -201,16 +207,16 @@ Mirror(s):
     - `Mirror 2 <https://github.com/isl-org/open3d_downloads/releases/download/redwood/livingroom1-fragments-ply.zip>`_
 Contents:
     .. code-block::
-                   
+
             office1-fragments-ply.zip
             ├── cloud_bin_0.ply
             ├── cloud_bin_1.ply
             ├── ...
-            └── cloud_bin_52.ply          
+            └── cloud_bin_52.ply
 
-Source: 
+Source:
     Office point cloud fragments from Redwood RGB-D office1 sequence.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
@@ -218,7 +224,7 @@ Triangle Mesh Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Bunny 
+Bunny
 ----------------------------------------
 
 Loading and visualizing example:
@@ -240,9 +246,9 @@ Mirror(s):
     - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/BunnyMesh.ply>`_
 Contents:
     BunnyMesh.ply
-Source: 
+Source:
     Stanford University Computer Graphics Laboratory.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
@@ -268,9 +274,9 @@ Mirror(s):
     - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/ArmadilloMesh.ply>`_
 Contents:
     Stanford University Computer Graphics Laboratory.
-Source: 
+Source:
     Living Room point cloud fragment from Redwood RGB-D livingroom1 sequence.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
@@ -296,16 +302,16 @@ Mirror(s):
     - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/fragment.ply>`_
 Contents:
     fragment.ply
-Source: 
+Source:
     Living Room point cloud fragment from Redwood RGB-D livingroom1 sequence.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
 RGB-D Data
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Sample NYU RGB-D Dataset Image 
+Sample NYU RGB-D Dataset Image
 ----------------------------------------
 
 Loading data:
@@ -327,13 +333,13 @@ Mirror(s):
     - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/fragment.ply>`_
 Contents:
     fragment.ply
-Source: 
+Source:
     Living Room point cloud fragment from Redwood RGB-D livingroom1 sequence.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
-Sample SUN RGB-D Dataset Image 
+Sample SUN RGB-D Dataset Image
 ----------------------------------------
 
 Loading data:
@@ -355,13 +361,13 @@ Mirror(s):
     - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/fragment.ply>`_
 Contents:
     fragment.ply
-Source: 
+Source:
     Living Room point cloud fragment from Redwood RGB-D livingroom1 sequence.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
-Sample TUM RGB-D Dataset Image 
+Sample TUM RGB-D Dataset Image
 ----------------------------------------
 
 Loading data:
@@ -383,9 +389,9 @@ Mirror(s):
     - `Mirror 1 <https://github.com/isl-org/open3d_downloads/releases/download/20220201-data/fragment.ply>`_
 Contents:
     fragment.ply
-Source: 
+Source:
     Living Room point cloud fragment from Redwood RGB-D livingroom1 sequence.
-Licence: 
+Licence:
     Creative Commons 3.0 (CC BY 3.0).
 
 
