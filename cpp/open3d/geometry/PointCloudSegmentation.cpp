@@ -37,6 +37,49 @@
 #include "open3d/geometry/TriangleMesh.h"
 #include "open3d/utility/Logging.h"
 
+namespace {
+
+/// \class RandomSampler
+///
+/// \brief Helper class for random sampling
+template <typename T>
+class RandomSampler {
+public:
+    explicit RandomSampler(const size_t size,
+                           open3d::utility::optional<int> seed)
+        : size_(size) {
+        if (!seed.has_value()) {
+            std::random_device rd;
+            seed = rd();
+        }
+        rng_ = std::mt19937(seed.value());
+    }
+
+    std::vector<T> operator()(size_t sample_size) {
+        std::lock_guard<std::mutex> guard(mutex_);
+
+        std::vector<T> sample;
+        sample.reserve(sample_size);
+
+        size_t valid_sample = 0;
+        while (valid_sample < sample_size) {
+            const size_t idx = rng_() % size_;
+            if (std::find(sample.begin(), sample.end(), idx) == sample.end()) {
+                sample.push_back(idx);
+                valid_sample++;
+            }
+        }
+
+        return sample;
+    }
+
+private:
+    size_t size_;
+    std::mt19937 rng_;
+    std::mutex mutex_;
+};
+}  // namespace
+
 namespace open3d {
 namespace geometry {
 
